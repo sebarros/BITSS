@@ -19,8 +19,8 @@ public class VideojuegoService {
         return repository.findAll();
     }
 
-    public Optional<Videojuego> obtenerPorId(Long id) {
-        return repository.findById(id);
+    public Videojuego obtenerPorId(Long id) {
+        return repository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Videojuego no encontrado con ID: " + id));
     }
 
     public Videojuego crear(Videojuego videojuego) {
@@ -28,8 +28,7 @@ public class VideojuegoService {
     }
 
     public Videojuego actualizar(Long id, Videojuego datos) {
-        Videojuego videojuego = repository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Videojuego no encontrado con ID: " + id));
+        Videojuego videojuego = repository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Videojuego no encontrado con ID: " + id));
         videojuego.setNombre(datos.getNombre());
         videojuego.setCategoria(datos.getCategoria());
         videojuego.setPrecio(datos.getPrecio());
@@ -37,8 +36,7 @@ public class VideojuegoService {
     }
 
     public void eliminar(Long id) {
-        Videojuego videojuego = repository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Videojuego no encontrado con ID: " + id));
+        Videojuego videojuego = repository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Videojuego no encontrado con ID: " + id));
         repository.delete(videojuego);
     }
 

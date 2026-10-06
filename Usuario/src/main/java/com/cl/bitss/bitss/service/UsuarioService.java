@@ -21,8 +21,8 @@ public class UsuarioService {
         return usuarioRepository.findAll();
     }
 
-    public Optional<Usuario> buscarPorId(Long id) {
-        return usuarioRepository.findById(id);
+    public Usuario buscarPorId(Long id) {
+        return usuarioRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Usuario no encontrado con ID: " + id));
     }
 
     public Optional<Usuario> buscarPorCorreo(String correo) {
@@ -37,8 +37,7 @@ public class UsuarioService {
     }
 
     public Usuario actualizarUsuario(Long id, Usuario usuarioActualizado) {
-        Usuario usuario = usuarioRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Usuario no encontrado con ID: " + id));
+        Usuario usuario = usuarioRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Usuario no encontrado con ID: " + id));
         usuario.setNombre(usuarioActualizado.getNombre());
         usuario.setApellido(usuarioActualizado.getApellido());
         usuario.setCorreo(usuarioActualizado.getCorreo());
@@ -46,8 +45,7 @@ public class UsuarioService {
     }
 
     public void eliminarUsuario(Long id) {
-        Usuario usuario = usuarioRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Usuario no encontrado con ID: " + id));
+        Usuario usuario = usuarioRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Usuario no encontrado con ID: " + id));
         usuarioRepository.delete(usuario);
     }
 }

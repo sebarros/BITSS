@@ -18,13 +18,9 @@ public class CarritoService {
 
     private final CarritoRepository repository;
 
-    private final WebClient clientUsuarios = WebClient.builder()
-            .baseUrl("http://localhost:8081")
-            .build();
+    private final WebClient clientUsuarios = WebClient.builder().baseUrl("http://localhost:8081").build();
 
-    private final WebClient clientCatalogo = WebClient.builder()
-            .baseUrl("http://localhost:8082")
-            .build();
+    private final WebClient clientCatalogo = WebClient.builder().baseUrl("http://localhost:8082").build();
 
     public CarritoService(CarritoRepository repository) {
         this.repository = repository;
@@ -34,8 +30,8 @@ public class CarritoService {
         return repository.findAll();
     }
 
-    public Optional<Carrito> obtenerPorId(Long id) {
-        return repository.findById(id);
+    public Carrito obtenerPorId(Long id) {
+        return repository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Carrito no encontrado con ID: " + id));
     }
 
     @Transactional
@@ -43,20 +39,16 @@ public class CarritoService {
         clientUsuarios.get()
                 .uri("/usuarios/" + carrito.getUsuarioId())
                 .retrieve()
-                .onStatus(status -> status.is4xxClientError(), response
-                        -> Mono.error(new BusinessException("El usuario indicado no existe")))
-                .onStatus(status -> status.is5xxServerError(), response
-                        -> Mono.error(new BusinessException("Error en servicio Usuarios")))
+                .onStatus(status -> status.is4xxClientError(), response -> Mono.error(new BusinessException("El usuario indicado no existe")))
+                .onStatus(status -> status.is5xxServerError(), response -> Mono.error(new BusinessException("Error en servicio Usuarios")))
                 .bodyToMono(UsuarioDTO.class)
                 .block();
 
         VideojuegoDTO juego = clientCatalogo.get()
                 .uri("/videojuegos/" + carrito.getVideojuegoId())
                 .retrieve()
-                .onStatus(status -> status.is4xxClientError(), response
-                        -> Mono.error(new BusinessException("El videojuego indicado no existe")))
-                .onStatus(status -> status.is5xxServerError(), response
-                        -> Mono.error(new BusinessException("Error en servicio Catálogo")))
+                .onStatus(status -> status.is4xxClientError(), response -> Mono.error(new BusinessException("El videojuego indicado no existe")))
+                .onStatus(status -> status.is5xxServerError(), response -> Mono.error(new BusinessException("Error en servicio Catálogo")))
                 .bodyToMono(VideojuegoDTO.class)
                 .block();
         carrito.setNombreVideojuego(juego.getNombre());
@@ -67,22 +59,15 @@ public class CarritoService {
 
     @Transactional
     public Carrito actualizar(Long id, Carrito datos) {
-        Carrito carrito = repository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Carrito no encontrado con ID: " + id));
+        Carrito carrito = repository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Carrito no encontrado con ID: " + id));
 
         clientUsuarios.get().uri("/usuarios/" + datos.getUsuarioId()).retrieve()
-                .onStatus(status -> status.is4xxClientError(), response
-                        -> Mono.error(new BusinessException("El usuario indicado no existe")))
-                .onStatus(status -> status.is5xxServerError(), response
-                        -> Mono.error(new BusinessException("Error en servicio Usuarios")))
-                .bodyToMono(UsuarioDTO.class).block();
+                .onStatus(status -> status.is4xxClientError(), response -> Mono.error(new BusinessException("El usuario indicado no existe")))
+                .onStatus(status -> status.is5xxServerError(), response -> Mono.error(new BusinessException("Error en servicio Usuarios"))).bodyToMono(UsuarioDTO.class).block();
 
         VideojuegoDTO juego = clientCatalogo.get().uri("/videojuegos/" + datos.getVideojuegoId()).retrieve()
-                .onStatus(status -> status.is4xxClientError(), response
-                        -> Mono.error(new BusinessException("El videojuego indicado no existe")))
-                .onStatus(status -> status.is5xxServerError(), response
-                        -> Mono.error(new BusinessException("Error en servicio Catálogo")))
-                .bodyToMono(VideojuegoDTO.class).block();
+                .onStatus(status -> status.is4xxClientError(), response -> Mono.error(new BusinessException("El videojuego indicado no existe")))
+                .onStatus(status -> status.is5xxServerError(), response -> Mono.error(new BusinessException("Error en servicio Catálogo"))).bodyToMono(VideojuegoDTO.class).block();
         carrito.setUsuarioId(datos.getUsuarioId());
         carrito.setVideojuegoId(datos.getVideojuegoId());
         carrito.setNombreVideojuego(juego.getNombre());
@@ -92,8 +77,7 @@ public class CarritoService {
     }
 
     public void eliminar(Long id) {
-        Carrito carrito = repository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Carrito no encontrado con ID: " + id));
+        Carrito carrito = repository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Carrito no encontrado con ID: " + id));
         repository.delete(carrito);
     }
 

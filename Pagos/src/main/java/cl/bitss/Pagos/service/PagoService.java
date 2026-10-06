@@ -19,9 +19,7 @@ public class PagoService {
 
     private final boolean pasarelaActiva;
 
-    private final WebClient clientPasarela = WebClient.builder()
-            .baseUrl("http://localhost:8090")
-            .build();
+    private final WebClient clientPasarela = WebClient.builder().baseUrl("http://localhost:8090").build();
 
     public PagoService(PagoRepository repository, @Value("${pasarela.externa.activa:false}") boolean pasarelaActiva) {
         this.repository = repository;
@@ -32,8 +30,8 @@ public class PagoService {
         return repository.findAll();
     }
 
-    public Optional<Pago> obtenerPorId(Long id) {
-        return repository.findById(id);
+    public Pago obtenerPorId(Long id) {
+        return repository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Pago no encontrado con ID: " + id));
     }
 
     @Transactional
@@ -43,10 +41,8 @@ public class PagoService {
                     .uri("/pagos")
                     .bodyValue(pago)
                     .retrieve()
-                    .onStatus(status -> status.is4xxClientError(), response
-                            -> Mono.error(new BusinessException("La pasarela rechazó el pago")))
-                    .onStatus(status -> status.is5xxServerError(), response
-                            -> Mono.error(new BusinessException("La pasarela de pago no está disponible")))
+                    .onStatus(status -> status.is4xxClientError(), response -> Mono.error(new BusinessException("La pasarela rechazó el pago")))
+                    .onStatus(status -> status.is5xxServerError(), response -> Mono.error(new BusinessException("La pasarela de pago no está disponible")))
                     .toBodilessEntity()
                     .block();
         }
@@ -55,8 +51,7 @@ public class PagoService {
     }
 
     public Pago actualizar(Long id, Pago datos) {
-        Pago pago = repository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Pago no encontrado con ID: " + id));
+        Pago pago = repository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Pago no encontrado con ID: " + id));
         pago.setPedidoId(datos.getPedidoId());
         pago.setUsuarioId(datos.getUsuarioId());
         pago.setMonto(datos.getMonto());
@@ -66,8 +61,7 @@ public class PagoService {
     }
 
     public void eliminar(Long id) {
-        Pago pago = repository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Pago no encontrado con ID: " + id));
+        Pago pago = repository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Pago no encontrado con ID: " + id));
         repository.delete(pago);
     }
 

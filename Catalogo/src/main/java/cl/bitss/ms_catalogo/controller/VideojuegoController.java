@@ -25,7 +25,7 @@ public class VideojuegoController {
 
     @GetMapping("/{id}")
     public ResponseEntity<Videojuego> obtenerPorId(@PathVariable Long id) {
-        return service.obtenerPorId(id).map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
+        return ResponseEntity.ok(service.obtenerPorId(id));
     }
 
     @PostMapping

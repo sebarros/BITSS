@@ -20,21 +20,13 @@ public class PedidoService {
 
     private final PedidoRepository repository;
 
-    private final WebClient clientUsuarios = WebClient.builder()
-            .baseUrl("http://localhost:8081")
-            .build();
+    private final WebClient clientUsuarios = WebClient.builder().baseUrl("http://localhost:8081").build();
 
-    private final WebClient clientCarrito = WebClient.builder()
-            .baseUrl("http://localhost:8083")
-            .build();
+    private final WebClient clientCarrito = WebClient.builder().baseUrl("http://localhost:8083").build();
 
-    private final WebClient clientPagos = WebClient.builder()
-            .baseUrl("http://localhost:8085")
-            .build();
+    private final WebClient clientPagos = WebClient.builder().baseUrl("http://localhost:8085").build();
 
-    private final WebClient clientColeccion = WebClient.builder()
-            .baseUrl("http://localhost:8086")
-            .build();
+    private final WebClient clientColeccion = WebClient.builder().baseUrl("http://localhost:8086").build();
 
     public PedidoService(PedidoRepository repository) {
         this.repository = repository;
@@ -44,8 +36,8 @@ public class PedidoService {
         return repository.findAll();
     }
 
-    public Optional<Pedido> obtenerPorId(Long id) {
-        return repository.findById(id);
+    public Pedido obtenerPorId(Long id) {
+        return repository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Pedido no encontrado con ID: " + id));
     }
 
     @Transactional
@@ -53,20 +45,16 @@ public class PedidoService {
         clientUsuarios.get()
                 .uri("/usuarios/" + pedido.getUsuarioId())
                 .retrieve()
-                .onStatus(status -> status.is4xxClientError(), response
-                        -> Mono.error(new BusinessException("El usuario no existe")))
-                .onStatus(status -> status.is5xxServerError(), response
-                        -> Mono.error(new BusinessException("Error en servicio Usuarios")))
+                .onStatus(status -> status.is4xxClientError(), response-> Mono.error(new BusinessException("El usuario no existe")))
+                .onStatus(status -> status.is5xxServerError(), response -> Mono.error(new BusinessException("Error en servicio Usuarios")))
                 .bodyToMono(UsuarioDTO.class)
                 .block();
 
         List<CarritoDTO> carrito = clientCarrito.get()
                 .uri("/carrito/usuario/" + pedido.getUsuarioId())
                 .retrieve()
-                .onStatus(status -> status.is4xxClientError(), response
-                        -> Mono.error(new BusinessException("No fue posible obtener el carrito")))
-                .onStatus(status -> status.is5xxServerError(), response
-                        -> Mono.error(new BusinessException("Error en servicio Carrito")))
+                .onStatus(status -> status.is4xxClientError(), response -> Mono.error(new BusinessException("No fue posible obtener el carrito")))
+                .onStatus(status -> status.is5xxServerError(), response -> Mono.error(new BusinessException("Error en servicio Carrito")))
                 .bodyToFlux(CarritoDTO.class)
                 .collectList()
                 .block();
@@ -79,7 +67,6 @@ public class PedidoService {
         pedido.setTotal(total);
         pedido.setEstado("PENDIENTE");
         Pedido pedidoGuardado = repository.save(pedido);
-
         PagoDTO pago = new PagoDTO();
         pago.setPedidoId(pedidoGuardado.getId());
         pago.setUsuarioId(pedidoGuardado.getUsuarioId());
@@ -91,10 +78,8 @@ public class PedidoService {
                 .uri("/pagos")
                 .bodyValue(pago)
                 .retrieve()
-                .onStatus(status -> status.is4xxClientError(), response
-                        -> Mono.error(new BusinessException("El pago fue rechazado")))
-                .onStatus(status -> status.is5xxServerError(), response
-                        -> Mono.error(new BusinessException("Error en servicio Pagos")))
+                .onStatus(status -> status.is4xxClientError(), response -> Mono.error(new BusinessException("El pago fue rechazado")))
+                .onStatus(status -> status.is5xxServerError(), response -> Mono.error(new BusinessException("Error en servicio Pagos")))
                 .bodyToMono(PagoDTO.class)
                 .block();
 
@@ -109,10 +94,8 @@ public class PedidoService {
                     .uri("/coleccion")
                     .bodyValue(coleccion)
                     .retrieve()
-                    .onStatus(status -> status.is4xxClientError(), response
-                            -> Mono.error(new BusinessException("No fue posible agregar el juego a la colección")))
-                    .onStatus(status -> status.is5xxServerError(), response
-                            -> Mono.error(new BusinessException("Error en servicio Colección")))
+                    .onStatus(status -> status.is4xxClientError(), response -> Mono.error(new BusinessException("No fue posible agregar el juego a la colección")))
+                    .onStatus(status -> status.is5xxServerError(), response -> Mono.error(new BusinessException("Error en servicio Colección")))
                     .bodyToMono(ColeccionDTO.class)
                     .block();
         }
@@ -121,8 +104,7 @@ public class PedidoService {
     }
 
     public Pedido actualizar(Long id, Pedido datos) {
-        Pedido pedido = repository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Pedido no encontrado con ID: " + id));
+        Pedido pedido = repository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Pedido no encontrado con ID: " + id));
         pedido.setUsuarioId(datos.getUsuarioId());
         pedido.setTotal(datos.getTotal());
         pedido.setEstado(datos.getEstado());
@@ -130,8 +112,7 @@ public class PedidoService {
     }
 
     public void eliminar(Long id) {
-        Pedido pedido = repository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Pedido no encontrado con ID: " + id));
+        Pedido pedido = repository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Pedido no encontrado con ID: " + id));
         repository.delete(pedido);
     }
 

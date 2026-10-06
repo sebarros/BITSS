@@ -17,9 +17,7 @@ public class ColeccionService {
 
     private final ColeccionRepository repository;
 
-    private final WebClient clientUsuarios = WebClient.builder()
-            .baseUrl("http://localhost:8081")
-            .build();
+    private final WebClient clientUsuarios = WebClient.builder().baseUrl("http://localhost:8081").build();
 
     public ColeccionService(ColeccionRepository repository) {
         this.repository = repository;
@@ -29,8 +27,8 @@ public class ColeccionService {
         return repository.findAll();
     }
 
-    public Optional<Coleccion> obtenerPorId(Long id) {
-        return repository.findById(id);
+    public Coleccion obtenerPorId(Long id) {
+        return repository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Juego no encontrado en la colección con ID: " + id));
     }
 
     @Transactional
@@ -38,10 +36,8 @@ public class ColeccionService {
         clientUsuarios.get()
                 .uri("/usuarios/" + coleccion.getUsuarioId())
                 .retrieve()
-                .onStatus(status -> status.is4xxClientError(), response
-                        -> Mono.error(new BusinessException("El usuario no existe")))
-                .onStatus(status -> status.is5xxServerError(), response
-                        -> Mono.error(new BusinessException("Error en servicio Usuarios")))
+                .onStatus(status -> status.is4xxClientError(), response -> Mono.error(new BusinessException("El usuario no existe")))
+                .onStatus(status -> status.is5xxServerError(), response -> Mono.error(new BusinessException("Error en servicio Usuarios")))
                 .bodyToMono(UsuarioDTO.class)
                 .block();
         return repository.save(coleccion);
@@ -49,16 +45,13 @@ public class ColeccionService {
 
     @Transactional
     public Coleccion actualizar(Long id, Coleccion datos) {
-        Coleccion coleccion = repository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Juego no encontrado en la colección con ID: " + id));
+        Coleccion coleccion = repository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Juego no encontrado en la colección con ID: " + id));
 
         clientUsuarios.get()
                 .uri("/usuarios/" + datos.getUsuarioId())
                 .retrieve()
-                .onStatus(status -> status.is4xxClientError(), response
-                        -> Mono.error(new BusinessException("El usuario no existe")))
-                .onStatus(status -> status.is5xxServerError(), response
-                        -> Mono.error(new BusinessException("Error en servicio Usuarios")))
+                .onStatus(status -> status.is4xxClientError(), response -> Mono.error(new BusinessException("El usuario no existe")))
+                .onStatus(status -> status.is5xxServerError(), response -> Mono.error(new BusinessException("Error en servicio Usuarios")))
                 .bodyToMono(UsuarioDTO.class)
                 .block();
 
@@ -70,8 +63,7 @@ public class ColeccionService {
     }
 
     public void eliminar(Long id) {
-        Coleccion coleccion = repository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Juego no encontrado en la colección con ID: " + id));
+        Coleccion coleccion = repository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Juego no encontrado en la colección con ID: " + id));
         repository.delete(coleccion);
     }
 

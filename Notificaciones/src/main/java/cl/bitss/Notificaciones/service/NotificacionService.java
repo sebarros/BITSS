@@ -19,17 +19,11 @@ public class NotificacionService {
 
     private final NotificacionRepository repository;
 
-    private final WebClient clientUsuarios = WebClient.builder()
-            .baseUrl("http://localhost:8081")
-            .build();
+    private final WebClient clientUsuarios = WebClient.builder().baseUrl("http://localhost:8081").build();
 
-    private final WebClient clientGestion = WebClient.builder()
-            .baseUrl("http://localhost:8084")
-            .build();
+    private final WebClient clientGestion = WebClient.builder().baseUrl("http://localhost:8084").build();
 
-    private final WebClient clientCatalogo = WebClient.builder()
-            .baseUrl("http://localhost:8082")
-            .build();
+    private final WebClient clientCatalogo = WebClient.builder().baseUrl("http://localhost:8082").build();
 
     public NotificacionService(NotificacionRepository repository) {
         this.repository = repository;
@@ -39,8 +33,8 @@ public class NotificacionService {
         return repository.findAll();
     }
 
-    public Optional<Notificacion> obtenerPorId(Long id) {
-        return repository.findById(id);
+    public Notificacion obtenerPorId(Long id) {
+        return repository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Notificación no encontrada con ID: " + id));
     }
 
     @Transactional
@@ -48,10 +42,8 @@ public class NotificacionService {
         clientUsuarios.get()
                 .uri("/usuarios/" + notificacion.getUsuarioId())
                 .retrieve()
-                .onStatus(status -> status.is4xxClientError(), response
-                        -> Mono.error(new BusinessException("El usuario no existe")))
-                .onStatus(status -> status.is5xxServerError(), response
-                        -> Mono.error(new BusinessException("Error en servicio Usuarios")))
+                .onStatus(status -> status.is4xxClientError(), response -> Mono.error(new BusinessException("El usuario no existe")))
+                .onStatus(status -> status.is5xxServerError(), response-> Mono.error(new BusinessException("Error en servicio Usuarios")))
                 .bodyToMono(UsuarioDTO.class)
                 .block();
 
@@ -59,10 +51,8 @@ public class NotificacionService {
             PedidoDTO pedido = clientGestion.get()
                     .uri("/pedidos/" + notificacion.getPedidoId())
                     .retrieve()
-                    .onStatus(status -> status.is4xxClientError(), response
-                            -> Mono.error(new BusinessException("El pedido indicado no existe")))
-                    .onStatus(status -> status.is5xxServerError(), response
-                            -> Mono.error(new BusinessException("Error en servicio Gestión")))
+                    .onStatus(status -> status.is4xxClientError(), response -> Mono.error(new BusinessException("El pedido indicado no existe")))
+                    .onStatus(status -> status.is5xxServerError(), response -> Mono.error(new BusinessException("Error en servicio Gestión")))
                     .bodyToMono(PedidoDTO.class)
                     .block();
             if (!pedido.getUsuarioId().equals(notificacion.getUsuarioId())) {
@@ -74,10 +64,8 @@ public class NotificacionService {
             clientCatalogo.get()
                     .uri("/videojuegos/" + notificacion.getVideojuegoId())
                     .retrieve()
-                    .onStatus(status -> status.is4xxClientError(), response
-                            -> Mono.error(new BusinessException("El videojuego indicado no existe")))
-                    .onStatus(status -> status.is5xxServerError(), response
-                            -> Mono.error(new BusinessException("Error en servicio Catálogo")))
+                    .onStatus(status -> status.is4xxClientError(), response -> Mono.error(new BusinessException("El videojuego indicado no existe")))
+                    .onStatus(status -> status.is5xxServerError(), response -> Mono.error(new BusinessException("Error en servicio Catálogo")))
                     .bodyToMono(VideojuegoDTO.class)
                     .block();
         }
@@ -85,8 +73,7 @@ public class NotificacionService {
     }
 
     public Notificacion actualizar(Long id, Notificacion datos) {
-        Notificacion notificacion = repository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Notificación no encontrada con ID: " + id));
+        Notificacion notificacion = repository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Notificación no encontrada con ID: " + id));
         notificacion.setUsuarioId(datos.getUsuarioId());
         notificacion.setPedidoId(datos.getPedidoId());
         notificacion.setVideojuegoId(datos.getVideojuegoId());
@@ -97,8 +84,7 @@ public class NotificacionService {
     }
 
     public void eliminar(Long id) {
-        Notificacion notificacion = repository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Notificación no encontrada con ID: " + id));
+        Notificacion notificacion = repository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Notificación no encontrada con ID: " + id));
         repository.delete(notificacion);
     }
 
