@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="CompilerConfiguration">
+    <annotationProcessing>
+      <profile name="Maven default annotation processors profile" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <module name="Coleccion" />
+        <module name="Gestion" />
+        <module name="Notificaciones" />
+        <module name="bitss" />
+        <module name="Carro" />
+        <module name="ApiGateway" />
+        <module name="Pagos" />
+        <module name="ms-catalogo" />
+      </profile>
+    </annotationProcessing>
+  </component>
+  <component name="JavacSettings">
+    <option name="ADDITIONAL_OPTIONS_OVERRIDE">
+      <module name="ApiGateway" options="-parameters" />
+      <module name="Carro" options="-parameters" />
+      <module name="Coleccion" options="-parameters" />
+      <module name="Gestion" options="-parameters" />
+      <module name="Notificaciones" options="-parameters" />
+      <module name="Pagos" options="-parameters" />
+      <module name="bitss" options="-parameters" />
+      <module name="ms-catalogo" options="-parameters" />
+    </option>
+  </component>
+</project>
