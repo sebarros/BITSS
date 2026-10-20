@@ -44,7 +44,11 @@ public class VideojuegoController {
         return ResponseEntity.ok(Map.of("mensaje", "Videojuego eliminado correctamente", "id", id));
     }
 
-    @GetMapping("/categoria/{categoria}")
+    @GetMapping("/buscar")
+    public List<Videojuego> buscarPorNombre(@RequestParam String nombre) {
+        return service.buscarPorNombre(nombre);}@GetMapping("/categoria/{categoria}"
+    )
+
     public List<Videojuego> buscarPorCategoria(@PathVariable String categoria) {
         return service.buscarPorCategoria(categoria);
     }

@@ -20,13 +20,13 @@ public class PedidoService {
 
     private final PedidoRepository repository;
 
-    private final WebClient clientUsuarios = WebClient.builder().baseUrl("http://localhost:8081").build();
+    private final WebClient clientUsuarios = WebClient.builder().baseUrl(System.getenv().getOrDefault("USUARIO_SERVICE_URL", "http://localhost:8081")).build();
 
-    private final WebClient clientCarrito = WebClient.builder().baseUrl("http://localhost:8083").build();
+    private final WebClient clientCarrito = WebClient.builder().baseUrl(System.getenv().getOrDefault("CARRO_SERVICE_URL", "http://localhost:8083")).build();
 
-    private final WebClient clientPagos = WebClient.builder().baseUrl("http://localhost:8085").build();
+    private final WebClient clientPagos = WebClient.builder().baseUrl(System.getenv().getOrDefault("PAGOS_SERVICE_URL", "http://localhost:8085")).build();
 
-    private final WebClient clientColeccion = WebClient.builder().baseUrl("http://localhost:8086").build();
+    private final WebClient clientColeccion = WebClient.builder().baseUrl(System.getenv().getOrDefault("COLECCION_SERVICE_URL", "http://localhost:8086")).build();
 
     public PedidoService(PedidoRepository repository) {
         this.repository = repository;

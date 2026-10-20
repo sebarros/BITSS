@@ -20,7 +20,6 @@ public class Pedido {
     @Positive(message = "El usuarioId debe ser mayor que 0")
     private Long usuarioId;
 
-    @NotNull(message = "El total es obligatorio")
     @PositiveOrZero(message = "El total no puede ser negativo")
     private Double total;
 

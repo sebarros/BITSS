@@ -5,6 +5,7 @@ import com.cl.bitss.bitss.exception.ResourceNotFoundException;
 import com.cl.bitss.bitss.model.Usuario;
 import com.cl.bitss.bitss.repository.UsuarioRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import java.util.List;
 import java.util.Optional;
@@ -12,6 +13,7 @@ import java.util.Optional;
 @Service
 public class UsuarioService {
     private final UsuarioRepository usuarioRepository;
+    private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
     public UsuarioService(UsuarioRepository usuarioRepository) {
         this.usuarioRepository = usuarioRepository;
@@ -33,7 +35,17 @@ public class UsuarioService {
         if (usuarioRepository.existsByCorreo(usuario.getCorreo())) {
             throw new BusinessException("El correo ya está registrado");
         }
+        usuario.setPassword(passwordEncoder.encode(usuario.getPassword()));
         return usuarioRepository.save(usuario);
+    }
+
+    public Usuario autenticar(String correo, String password) {
+        Usuario usuario = usuarioRepository.findByCorreo(correo)
+                .orElseThrow(() -> new BusinessException("Credenciales inválidas"));
+        if (!passwordEncoder.matches(password, usuario.getPassword())) {
+            throw new BusinessException("Credenciales inválidas");
+        }
+        return usuario;
     }
 
     public Usuario actualizarUsuario(Long id, Usuario usuarioActualizado) {

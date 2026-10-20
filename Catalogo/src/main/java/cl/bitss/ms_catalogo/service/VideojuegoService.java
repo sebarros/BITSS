@@ -40,7 +40,7 @@ public class VideojuegoService {
         repository.delete(videojuego);
     }
 
-    public List<Videojuego> buscarPorCategoria(String categoria) {
+    public List<Videojuego> buscarPorNombre(String nombre) {        return repository.findByNombreContainingIgnoreCase(nombre);    }    public List<Videojuego> buscarPorCategoria(String categoria) {
         return repository.findByCategoria(categoria);
     }
 }

@@ -19,7 +19,7 @@ public class PagoService {
 
     private final boolean pasarelaActiva;
 
-    private final WebClient clientPasarela = WebClient.builder().baseUrl("http://localhost:8090").build();
+    private final WebClient clientPasarela = WebClient.builder().baseUrl(System.getenv().getOrDefault("PASARELA_SERVICE_URL", "http://localhost:8090")).build();
 
     public PagoService(PagoRepository repository, @Value("${pasarela.externa.activa:false}") boolean pasarelaActiva) {
         this.repository = repository;

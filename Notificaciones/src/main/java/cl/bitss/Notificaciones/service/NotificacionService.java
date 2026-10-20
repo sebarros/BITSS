@@ -19,11 +19,11 @@ public class NotificacionService {
 
     private final NotificacionRepository repository;
 
-    private final WebClient clientUsuarios = WebClient.builder().baseUrl("http://localhost:8081").build();
+    private final WebClient clientUsuarios = WebClient.builder().baseUrl(System.getenv().getOrDefault("USUARIO_SERVICE_URL", "http://localhost:8081")).build();
 
-    private final WebClient clientGestion = WebClient.builder().baseUrl("http://localhost:8084").build();
+    private final WebClient clientGestion = WebClient.builder().baseUrl(System.getenv().getOrDefault("GESTION_SERVICE_URL", "http://localhost:8084")).build();
 
-    private final WebClient clientCatalogo = WebClient.builder().baseUrl("http://localhost:8082").build();
+    private final WebClient clientCatalogo = WebClient.builder().baseUrl(System.getenv().getOrDefault("CATALOGO_SERVICE_URL", "http://localhost:8082")).build();
 
     public NotificacionService(NotificacionRepository repository) {
         this.repository = repository;

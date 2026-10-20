@@ -33,7 +33,7 @@ set -euf
 [ "${MVNW_VERBOSE-}" != debug ] || set -x
 
 # OS specific support.
-native_path() { printf %s\\n "$1"; }
+native_path() { printf %s\ "$1"; }
 case "$(uname)" in
 CYGWIN* | MINGW*)
   [ -z "${JAVA_HOME-}" ] || JAVA_HOME="$(cygpath --unix "$JAVA_HOME")"
@@ -86,14 +86,14 @@ hash_string() {
     h=$(((h * 31 + $(LC_CTYPE=C printf %d "'$char")) % 4294967296))
     str="${str#?}"
   done
-  printf %x\\n $h
+  printf %x\ $h
 }
 
 verbose() { :; }
-[ "${MVNW_VERBOSE-}" != true ] || verbose() { printf %s\\n "${1-}"; }
+[ "${MVNW_VERBOSE-}" != true ] || verbose() { printf %s\ "${1-}"; }
 
 die() {
-  printf %s\\n "$1" >&2
+  printf %s\ "$1" >&2
   exit 1
 }
 
@@ -288,7 +288,7 @@ if [ -z "$actualDistributionDir" ]; then
 fi
 
 verbose "Found extracted Maven distribution directory: $actualDistributionDir"
-printf %s\\n "$distributionUrl" >"$TMP_DOWNLOAD_DIR/$actualDistributionDir/mvnw.url"
+printf %s\ "$distributionUrl" >"$TMP_DOWNLOAD_DIR/$actualDistributionDir/mvnw.url"
 mv -- "$TMP_DOWNLOAD_DIR/$actualDistributionDir" "$MAVEN_HOME" || [ -d "$MAVEN_HOME" ] || die "fail to move MAVEN_HOME"
 
 clean || :

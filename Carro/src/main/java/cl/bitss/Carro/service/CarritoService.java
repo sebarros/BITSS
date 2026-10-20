@@ -18,9 +18,9 @@ public class CarritoService {
 
     private final CarritoRepository repository;
 
-    private final WebClient clientUsuarios = WebClient.builder().baseUrl("http://localhost:8081").build();
+    private final WebClient clientUsuarios = WebClient.builder().baseUrl(System.getenv().getOrDefault("USUARIO_SERVICE_URL", "http://localhost:8081")).build();
 
-    private final WebClient clientCatalogo = WebClient.builder().baseUrl("http://localhost:8082").build();
+    private final WebClient clientCatalogo = WebClient.builder().baseUrl(System.getenv().getOrDefault("CATALOGO_SERVICE_URL", "http://localhost:8082")).build();
 
     public CarritoService(CarritoRepository repository) {
         this.repository = repository;

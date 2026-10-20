@@ -6,4 +6,5 @@ import java.util.List;
 
 public interface VideojuegoRepository extends JpaRepository<Videojuego, Long> {
     List<Videojuego> findByCategoria(String categoria);
+    List<Videojuego> findByNombreContainingIgnoreCase(String nombre);
 }

@@ -17,7 +17,7 @@ public class ColeccionService {
 
     private final ColeccionRepository repository;
 
-    private final WebClient clientUsuarios = WebClient.builder().baseUrl("http://localhost:8081").build();
+    private final WebClient clientUsuarios = WebClient.builder().baseUrl(System.getenv().getOrDefault("USUARIO_SERVICE_URL", "http://localhost:8081")).build();
 
     public ColeccionService(ColeccionRepository repository) {
         this.repository = repository;

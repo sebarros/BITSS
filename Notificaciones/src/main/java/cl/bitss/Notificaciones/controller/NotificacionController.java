@@ -49,6 +49,26 @@ public class NotificacionController {
         return service.obtenerPorUsuario(usuarioId);
     }
 
+
+    @PostMapping("/ofertas")
+    public ResponseEntity<Notificacion> crearOferta(@RequestBody Map<String, Object> datos) {
+        Notificacion notificacion = new Notificacion();
+        notificacion.setUsuarioId(Long.valueOf(datos.get("usuarioId").toString()));
+        notificacion.setTipo("OFERTA");
+        notificacion.setMensaje(datos.get("mensaje").toString());
+        notificacion.setEstado("PENDIENTE");
+        return ResponseEntity.status(HttpStatus.CREATED).body(service.crear(notificacion));
+    }
+
+    @PostMapping("/promociones")
+    public ResponseEntity<Notificacion> crearPromocion(@RequestBody Map<String, Object> datos) {
+        Notificacion notificacion = new Notificacion();
+        notificacion.setUsuarioId(Long.valueOf(datos.get("usuarioId").toString()));
+        notificacion.setTipo("PROMOCION");
+        notificacion.setMensaje(datos.get("mensaje").toString());
+        notificacion.setEstado("PENDIENTE");
+        return ResponseEntity.status(HttpStatus.CREATED).body(service.crear(notificacion));
+    }
     @GetMapping("/tipo/{tipo}")
     public List<Notificacion> obtenerPorTipo(@PathVariable String tipo) {
         return service.obtenerPorTipo(tipo);

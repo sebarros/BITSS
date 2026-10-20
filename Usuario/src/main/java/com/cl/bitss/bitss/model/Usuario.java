@@ -1,6 +1,7 @@
 package com.cl.bitss.bitss.model;
 
 import jakarta.persistence.*;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 
@@ -21,6 +22,7 @@ public class Usuario {
     @Column(unique = true, nullable = false)
     private String correo;
 
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     @NotBlank(message = "La contraseña es obligatoria")
     private String password;
 
