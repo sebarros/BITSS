@@ -4,6 +4,6 @@ on: [push]
 jobs:
   saludo:
   runs-on: ubuntu-latest
-  stepts:
+  steps:
   - name: hola mundo
     run: echo "hola mundo !"
