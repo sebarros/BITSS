@@ -1,206 +1,205 @@
 services:
   mysql:
     image: mysql:8.4
-    container_name: bitss-mysql
     environment:
-      MYSQL_ROOT_PASSWORD: secret
-    ports:
-    - 3307:3306
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:?Define MYSQL_ROOT_PASSWORD en .env}
     volumes:
-    - mysql_data:/var/lib/mysql
-    - ./mysql/init.sql:/docker-entrypoint-initdb.d/01-init.sql:ro
+      - mysql_data:/var/lib/mysql
+      - ./mysql/init.sql:/docker-entrypoint-initdb.d/01-init.sql:ro
     healthcheck:
-      test:
-      - CMD-SHELL
-      - mysqladmin ping -h 127.0.0.1 -uroot -p$$MYSQL_ROOT_PASSWORD --silent
+      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -uroot -p$$MYSQL_ROOT_PASSWORD --silent"]
       interval: 10s
       timeout: 5s
       retries: 15
       start_period: 30s
-  apigateway:
-    build:
-      context: ./ApiGateway
-    container_name: bitss-apigateway
-    ports:
-    - 8080:8080
     restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: "1.0"
+          memory: 768M
+        reservations:
+          cpus: "0.25"
+          memory: 256M
+
+  usuario:
+    build: ./Usuario
     environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/usuario_db?createDatabaseIfNotExist=true
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: ${MYSQL_ROOT_PASSWORD:?Define MYSQL_ROOT_PASSWORD en .env}
+      BITSS_JWT_SECRET: ${BITSS_JWT_SECRET:?Define BITSS_JWT_SECRET en .env}
+    depends_on:
+      mysql:
+        condition: service_healthy
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: 512M
+        reservations:
+          cpus: "0.1"
+          memory: 128M
+
+  catalogo:
+    build: ./Catalogo
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/catalogo_db?createDatabaseIfNotExist=true
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: ${MYSQL_ROOT_PASSWORD:?Define MYSQL_ROOT_PASSWORD en .env}
+      BITSS_JWT_SECRET: ${BITSS_JWT_SECRET:?Define BITSS_JWT_SECRET en .env}
+    depends_on:
+      mysql:
+        condition: service_healthy
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: 512M
+        reservations:
+          cpus: "0.1"
+          memory: 128M
+
+  carro:
+    build: ./Carro
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/carro_db?createDatabaseIfNotExist=true
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: ${MYSQL_ROOT_PASSWORD:?Define MYSQL_ROOT_PASSWORD en .env}
+      BITSS_JWT_SECRET: ${BITSS_JWT_SECRET:?Define BITSS_JWT_SECRET en .env}
       USUARIO_SERVICE_URL: http://usuario:8081
       CATALOGO_SERVICE_URL: http://catalogo:8082
-      CARRO_SERVICE_URL: http://carro:8083
-      GESTION_SERVICE_URL: http://gestion:8084
-      PAGOS_SERVICE_URL: http://pagos:8085
-      COLECCION_SERVICE_URL: http://coleccion:8086
-      NOTIFICACIONES_SERVICE_URL: http://notificaciones:8087
-      PASARELA_SERVICE_URL: http://pasarela:8090
-      BITSS_JWT_SECRET: ${BITSS_JWT_SECRET:-BITSS-Cambiar-Esta-Clave-Secreta-Para-Produccion-2026}
     depends_on:
+      mysql:
+        condition: service_healthy
       usuario:
         condition: service_started
       catalogo:
         condition: service_started
-      carro:
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: 512M
+        reservations:
+          cpus: "0.1"
+          memory: 128M
+
+  gestion:
+    build: ./Gestion
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/gestion_db?createDatabaseIfNotExist=true
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: ${MYSQL_ROOT_PASSWORD:?Define MYSQL_ROOT_PASSWORD en .env}
+      BITSS_JWT_SECRET: ${BITSS_JWT_SECRET:?Define BITSS_JWT_SECRET en .env}
+      USUARIO_SERVICE_URL: http://usuario:8081
+      CARRO_SERVICE_URL: http://carro:8083
+      PAGOS_SERVICE_URL: http://pagos:8085
+      COLECCION_SERVICE_URL: http://coleccion:8086
+    depends_on:
+      mysql:
+        condition: service_healthy
+      usuario:
         condition: service_started
-      gestion:
+      carro:
         condition: service_started
       pagos:
         condition: service_started
       coleccion:
         condition: service_started
-      notificaciones:
-        condition: service_started
-  usuario:
-    build:
-      context: ./Usuario
-    container_name: bitss-usuario
-    ports:
-    - 8081:8081
     restart: unless-stopped
-    depends_on:
-      mysql:
-        condition: service_healthy
-    environment:
-      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/usuario_db?createDatabaseIfNotExist=true
-      SPRING_DATASOURCE_USERNAME: root
-      SPRING_DATASOURCE_PASSWORD: secret
-      USUARIO_SERVICE_URL: http://usuario:8081
-      CATALOGO_SERVICE_URL: http://catalogo:8082
-      CARRO_SERVICE_URL: http://carro:8083
-      GESTION_SERVICE_URL: http://gestion:8084
-      PAGOS_SERVICE_URL: http://pagos:8085
-      COLECCION_SERVICE_URL: http://coleccion:8086
-      NOTIFICACIONES_SERVICE_URL: http://notificaciones:8087
-      PASARELA_SERVICE_URL: http://pasarela:8090
-      BITSS_JWT_SECRET: ${BITSS_JWT_SECRET:-BITSS-Cambiar-Esta-Clave-Secreta-Para-Produccion-2026}
-  catalogo:
-    build:
-      context: ./Catalogo
-    container_name: bitss-catalogo
-    ports:
-    - 8082:8082
-    restart: unless-stopped
-    depends_on:
-      mysql:
-        condition: service_healthy
-    environment:
-      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/catalogo_db?createDatabaseIfNotExist=true
-      SPRING_DATASOURCE_USERNAME: root
-      SPRING_DATASOURCE_PASSWORD: secret
-      USUARIO_SERVICE_URL: http://usuario:8081
-      CATALOGO_SERVICE_URL: http://catalogo:8082
-      CARRO_SERVICE_URL: http://carro:8083
-      GESTION_SERVICE_URL: http://gestion:8084
-      PAGOS_SERVICE_URL: http://pagos:8085
-      COLECCION_SERVICE_URL: http://coleccion:8086
-      NOTIFICACIONES_SERVICE_URL: http://notificaciones:8087
-      PASARELA_SERVICE_URL: http://pasarela:8090
-      BITSS_JWT_SECRET: ${BITSS_JWT_SECRET:-BITSS-Cambiar-Esta-Clave-Secreta-Para-Produccion-2026}
-  carro:
-    build:
-      context: ./Carro
-    container_name: bitss-carro
-    ports:
-    - 8083:8083
-    restart: unless-stopped
-    depends_on:
-      mysql:
-        condition: service_healthy
-    environment:
-      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/carro_db?createDatabaseIfNotExist=true
-      SPRING_DATASOURCE_USERNAME: root
-      SPRING_DATASOURCE_PASSWORD: secret
-      USUARIO_SERVICE_URL: http://usuario:8081
-      CATALOGO_SERVICE_URL: http://catalogo:8082
-      CARRO_SERVICE_URL: http://carro:8083
-      GESTION_SERVICE_URL: http://gestion:8084
-      PAGOS_SERVICE_URL: http://pagos:8085
-      COLECCION_SERVICE_URL: http://coleccion:8086
-      NOTIFICACIONES_SERVICE_URL: http://notificaciones:8087
-      PASARELA_SERVICE_URL: http://pasarela:8090
-      BITSS_JWT_SECRET: ${BITSS_JWT_SECRET:-BITSS-Cambiar-Esta-Clave-Secreta-Para-Produccion-2026}
-  gestion:
-    build:
-      context: ./Gestion
-    container_name: bitss-gestion
-    ports:
-    - 8084:8084
-    restart: unless-stopped
-    depends_on:
-      mysql:
-        condition: service_healthy
-    environment:
-      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/gestion_db?createDatabaseIfNotExist=true
-      SPRING_DATASOURCE_USERNAME: root
-      SPRING_DATASOURCE_PASSWORD: secret
-      USUARIO_SERVICE_URL: http://usuario:8081
-      CATALOGO_SERVICE_URL: http://catalogo:8082
-      CARRO_SERVICE_URL: http://carro:8083
-      GESTION_SERVICE_URL: http://gestion:8084
-      PAGOS_SERVICE_URL: http://pagos:8085
-      COLECCION_SERVICE_URL: http://coleccion:8086
-      NOTIFICACIONES_SERVICE_URL: http://notificaciones:8087
-      PASARELA_SERVICE_URL: http://pasarela:8090
-      BITSS_JWT_SECRET: ${BITSS_JWT_SECRET:-BITSS-Cambiar-Esta-Clave-Secreta-Para-Produccion-2026}
+    deploy:
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: 512M
+        reservations:
+          cpus: "0.1"
+          memory: 128M
+
   pagos:
-    build:
-      context: ./Pagos
-    container_name: bitss-pagos
-    ports:
-    - 8085:8085
-    restart: unless-stopped
-    depends_on:
-      mysql:
-        condition: service_healthy
+    build: ./Pagos
     environment:
       SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/pagos_db?createDatabaseIfNotExist=true
       SPRING_DATASOURCE_USERNAME: root
-      SPRING_DATASOURCE_PASSWORD: secret
-      USUARIO_SERVICE_URL: http://usuario:8081
-      CATALOGO_SERVICE_URL: http://catalogo:8082
-      CARRO_SERVICE_URL: http://carro:8083
-      GESTION_SERVICE_URL: http://gestion:8084
-      PAGOS_SERVICE_URL: http://pagos:8085
-      COLECCION_SERVICE_URL: http://coleccion:8086
-      NOTIFICACIONES_SERVICE_URL: http://notificaciones:8087
-      PASARELA_SERVICE_URL: http://pasarela:8090
-      BITSS_JWT_SECRET: ${BITSS_JWT_SECRET:-BITSS-Cambiar-Esta-Clave-Secreta-Para-Produccion-2026}
-  coleccion:
-    build:
-      context: ./Coleccion
-    container_name: bitss-coleccion
-    ports:
-    - 8086:8086
-    restart: unless-stopped
+      SPRING_DATASOURCE_PASSWORD: ${MYSQL_ROOT_PASSWORD:?Define MYSQL_ROOT_PASSWORD en .env}
+      BITSS_JWT_SECRET: ${BITSS_JWT_SECRET:?Define BITSS_JWT_SECRET en .env}
+      PASARELA_SERVICE_URL: ${PASARELA_SERVICE_URL:-http://host.docker.internal:8090}
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     depends_on:
       mysql:
         condition: service_healthy
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: 512M
+        reservations:
+          cpus: "0.1"
+          memory: 128M
+
+  coleccion:
+    build: ./Coleccion
     environment:
       SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/coleccion_db?createDatabaseIfNotExist=true
       SPRING_DATASOURCE_USERNAME: root
-      SPRING_DATASOURCE_PASSWORD: secret
+      SPRING_DATASOURCE_PASSWORD: ${MYSQL_ROOT_PASSWORD:?Define MYSQL_ROOT_PASSWORD en .env}
+      BITSS_JWT_SECRET: ${BITSS_JWT_SECRET:?Define BITSS_JWT_SECRET en .env}
       USUARIO_SERVICE_URL: http://usuario:8081
-      CATALOGO_SERVICE_URL: http://catalogo:8082
-      CARRO_SERVICE_URL: http://carro:8083
-      GESTION_SERVICE_URL: http://gestion:8084
-      PAGOS_SERVICE_URL: http://pagos:8085
-      COLECCION_SERVICE_URL: http://coleccion:8086
-      NOTIFICACIONES_SERVICE_URL: http://notificaciones:8087
-      PASARELA_SERVICE_URL: http://pasarela:8090
-      BITSS_JWT_SECRET: ${BITSS_JWT_SECRET:-BITSS-Cambiar-Esta-Clave-Secreta-Para-Produccion-2026}
-  notificaciones:
-    build:
-      context: ./Notificaciones
-    container_name: bitss-notificaciones
-    ports:
-    - 8087:8087
-    restart: unless-stopped
     depends_on:
       mysql:
         condition: service_healthy
+      usuario:
+        condition: service_started
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: 512M
+        reservations:
+          cpus: "0.1"
+          memory: 128M
+
+  notificaciones:
+    build: ./Notificaciones
     environment:
       SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/notificaciones_db?createDatabaseIfNotExist=true
       SPRING_DATASOURCE_USERNAME: root
-      SPRING_DATASOURCE_PASSWORD: secret
+      SPRING_DATASOURCE_PASSWORD: ${MYSQL_ROOT_PASSWORD:?Define MYSQL_ROOT_PASSWORD en .env}
+      BITSS_JWT_SECRET: ${BITSS_JWT_SECRET:?Define BITSS_JWT_SECRET en .env}
+      USUARIO_SERVICE_URL: http://usuario:8081
+      GESTION_SERVICE_URL: http://gestion:8084
+      CATALOGO_SERVICE_URL: http://catalogo:8082
+    depends_on:
+      mysql:
+        condition: service_healthy
+      usuario:
+        condition: service_started
+      gestion:
+        condition: service_started
+      catalogo:
+        condition: service_started
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: 512M
+        reservations:
+          cpus: "0.1"
+          memory: 128M
+
+  apigateway:
+    build: ./ApiGateway
+    ports:
+      - "8080:8080"
+    environment:
       USUARIO_SERVICE_URL: http://usuario:8081
       CATALOGO_SERVICE_URL: http://catalogo:8082
       CARRO_SERVICE_URL: http://carro:8083
@@ -208,7 +207,24 @@ services:
       PAGOS_SERVICE_URL: http://pagos:8085
       COLECCION_SERVICE_URL: http://coleccion:8086
       NOTIFICACIONES_SERVICE_URL: http://notificaciones:8087
-      PASARELA_SERVICE_URL: http://pasarela:8090
-      BITSS_JWT_SECRET: ${BITSS_JWT_SECRET:-BITSS-Cambiar-Esta-Clave-Secreta-Para-Produccion-2026}
+      BITSS_JWT_SECRET: ${BITSS_JWT_SECRET:?Define BITSS_JWT_SECRET en .env}
+    depends_on:
+      - usuario
+      - catalogo
+      - carro
+      - gestion
+      - pagos
+      - coleccion
+      - notificaciones
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: 512M
+        reservations:
+          cpus: "0.1"
+          memory: 128M
+
 volumes:
-  mysql_data: {}
+  mysql_data:
