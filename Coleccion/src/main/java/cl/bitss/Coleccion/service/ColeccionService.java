@@ -32,9 +32,10 @@ public class ColeccionService {
     }
 
     @Transactional
-    public Coleccion crear(Coleccion coleccion) {
+    public Coleccion crear(Coleccion coleccion, String authorization) {
         clientUsuarios.get()
                 .uri("/usuarios/" + coleccion.getUsuarioId())
+                .header("Authorization", authorization)
                 .retrieve()
                 .onStatus(status -> status.is4xxClientError(), response -> Mono.error(new BusinessException("El usuario no existe")))
                 .onStatus(status -> status.is5xxServerError(), response -> Mono.error(new BusinessException("Error en servicio Usuarios")))
@@ -44,11 +45,12 @@ public class ColeccionService {
     }
 
     @Transactional
-    public Coleccion actualizar(Long id, Coleccion datos) {
+    public Coleccion actualizar(Long id, Coleccion datos, String authorization) {
         Coleccion coleccion = repository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Juego no encontrado en la colección con ID: " + id));
 
         clientUsuarios.get()
                 .uri("/usuarios/" + datos.getUsuarioId())
+                .header("Authorization", authorization)
                 .retrieve()
                 .onStatus(status -> status.is4xxClientError(), response -> Mono.error(new BusinessException("El usuario no existe")))
                 .onStatus(status -> status.is5xxServerError(), response -> Mono.error(new BusinessException("Error en servicio Usuarios")))

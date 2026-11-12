@@ -15,11 +15,8 @@ import java.util.Optional;
 
 @Service
 public class CarritoService {
-
     private final CarritoRepository repository;
-
     private final WebClient clientUsuarios = WebClient.builder().baseUrl(System.getenv().getOrDefault("USUARIO_SERVICE_URL", "http://localhost:8081")).build();
-
     private final WebClient clientCatalogo = WebClient.builder().baseUrl(System.getenv().getOrDefault("CATALOGO_SERVICE_URL", "http://localhost:8082")).build();
 
     public CarritoService(CarritoRepository repository) {
@@ -35,9 +32,10 @@ public class CarritoService {
     }
 
     @Transactional
-    public Carrito crear(Carrito carrito) {
+    public Carrito crear(Carrito carrito, String authorization) {
         clientUsuarios.get()
                 .uri("/usuarios/" + carrito.getUsuarioId())
+                .header("Authorization", authorization)
                 .retrieve()
                 .onStatus(status -> status.is4xxClientError(), response -> Mono.error(new BusinessException("El usuario indicado no existe")))
                 .onStatus(status -> status.is5xxServerError(), response -> Mono.error(new BusinessException("Error en servicio Usuarios")))
@@ -46,6 +44,7 @@ public class CarritoService {
 
         VideojuegoDTO juego = clientCatalogo.get()
                 .uri("/videojuegos/" + carrito.getVideojuegoId())
+                .header("Authorization", authorization)
                 .retrieve()
                 .onStatus(status -> status.is4xxClientError(), response -> Mono.error(new BusinessException("El videojuego indicado no existe")))
                 .onStatus(status -> status.is5xxServerError(), response -> Mono.error(new BusinessException("Error en servicio Catálogo")))
@@ -58,16 +57,24 @@ public class CarritoService {
     }
 
     @Transactional
-    public Carrito actualizar(Long id, Carrito datos) {
+    public Carrito actualizar(Long id, Carrito datos, String authorization) {
         Carrito carrito = repository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Carrito no encontrado con ID: " + id));
 
-        clientUsuarios.get().uri("/usuarios/" + datos.getUsuarioId()).retrieve()
+        clientUsuarios.get()
+                .uri("/usuarios/" + datos.getUsuarioId())
+                .header("Authorization", authorization)
+                .retrieve()
                 .onStatus(status -> status.is4xxClientError(), response -> Mono.error(new BusinessException("El usuario indicado no existe")))
-                .onStatus(status -> status.is5xxServerError(), response -> Mono.error(new BusinessException("Error en servicio Usuarios"))).bodyToMono(UsuarioDTO.class).block();
+                .onStatus(status -> status.is5xxServerError(), response -> Mono.error(new BusinessException("Error en servicio Usuarios"))).bodyToMono(UsuarioDTO.class)
+                .block();
 
-        VideojuegoDTO juego = clientCatalogo.get().uri("/videojuegos/" + datos.getVideojuegoId()).retrieve()
+        VideojuegoDTO juego = clientCatalogo.get()
+                .uri("/videojuegos/" + datos.getVideojuegoId())
+                .header("Authorization", authorization)
+                .retrieve()
                 .onStatus(status -> status.is4xxClientError(), response -> Mono.error(new BusinessException("El videojuego indicado no existe")))
-                .onStatus(status -> status.is5xxServerError(), response -> Mono.error(new BusinessException("Error en servicio Catálogo"))).bodyToMono(VideojuegoDTO.class).block();
+                .onStatus(status -> status.is5xxServerError(), response -> Mono.error(new BusinessException("Error en servicio Catálogo"))).bodyToMono(VideojuegoDTO.class)
+                .block();
         carrito.setUsuarioId(datos.getUsuarioId());
         carrito.setVideojuegoId(datos.getVideojuegoId());
         carrito.setNombreVideojuego(juego.getNombre());

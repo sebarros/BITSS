@@ -29,13 +29,13 @@ public class CarritoController {
     }
 
     @PostMapping
-    public ResponseEntity<Carrito> crear(@Valid @RequestBody Carrito carrito) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(service.crear(carrito));
+    public ResponseEntity<Carrito> crear(@Valid @RequestBody Carrito carrito, @RequestHeader("Authorization") String authorization) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(service.crear(carrito, authorization));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Carrito> actualizar(@PathVariable Long id, @Valid @RequestBody Carrito carrito) {
-        return ResponseEntity.ok(service.actualizar(id, carrito));
+    public ResponseEntity<Carrito> actualizar(@PathVariable Long id, @Valid @RequestBody Carrito carrito, @RequestHeader("Authorization") String authorization) {
+        return ResponseEntity.ok(service.actualizar(id, carrito, authorization));
     }
 
     @DeleteMapping("/{id}")

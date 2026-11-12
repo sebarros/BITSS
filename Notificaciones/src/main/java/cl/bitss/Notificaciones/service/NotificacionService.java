@@ -38,9 +38,10 @@ public class NotificacionService {
     }
 
     @Transactional
-    public Notificacion crear(Notificacion notificacion) {
+    public Notificacion crear(Notificacion notificacion,  String authorization) {
         clientUsuarios.get()
                 .uri("/usuarios/" + notificacion.getUsuarioId())
+                .header("Authorization", authorization)
                 .retrieve()
                 .onStatus(status -> status.is4xxClientError(), response -> Mono.error(new BusinessException("El usuario no existe")))
                 .onStatus(status -> status.is5xxServerError(), response-> Mono.error(new BusinessException("Error en servicio Usuarios")))
@@ -50,6 +51,7 @@ public class NotificacionService {
         if (notificacion.getPedidoId() != null) {
             PedidoDTO pedido = clientGestion.get()
                     .uri("/pedidos/" + notificacion.getPedidoId())
+                    .header("Authorization", authorization)
                     .retrieve()
                     .onStatus(status -> status.is4xxClientError(), response -> Mono.error(new BusinessException("El pedido indicado no existe")))
                     .onStatus(status -> status.is5xxServerError(), response -> Mono.error(new BusinessException("Error en servicio Gestión")))
@@ -63,6 +65,7 @@ public class NotificacionService {
         if (notificacion.getVideojuegoId() != null) {
             clientCatalogo.get()
                     .uri("/videojuegos/" + notificacion.getVideojuegoId())
+                    .header("Authorization", authorization)
                     .retrieve()
                     .onStatus(status -> status.is4xxClientError(), response -> Mono.error(new BusinessException("El videojuego indicado no existe")))
                     .onStatus(status -> status.is5xxServerError(), response -> Mono.error(new BusinessException("Error en servicio Catálogo")))

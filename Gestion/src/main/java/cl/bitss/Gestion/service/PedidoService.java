@@ -41,9 +41,10 @@ public class PedidoService {
     }
 
     @Transactional
-    public Pedido crear(Pedido pedido) {
+    public Pedido crear(Pedido pedido, String authorization) {
         clientUsuarios.get()
                 .uri("/usuarios/" + pedido.getUsuarioId())
+                .header("Authorization", authorization)
                 .retrieve()
                 .onStatus(status -> status.is4xxClientError(), response-> Mono.error(new BusinessException("El usuario no existe")))
                 .onStatus(status -> status.is5xxServerError(), response -> Mono.error(new BusinessException("Error en servicio Usuarios")))
@@ -52,6 +53,7 @@ public class PedidoService {
 
         List<CarritoDTO> carrito = clientCarrito.get()
                 .uri("/carrito/usuario/" + pedido.getUsuarioId())
+                .header("Authorization", authorization)
                 .retrieve()
                 .onStatus(status -> status.is4xxClientError(), response -> Mono.error(new BusinessException("No fue posible obtener el carrito")))
                 .onStatus(status -> status.is5xxServerError(), response -> Mono.error(new BusinessException("Error en servicio Carrito")))
@@ -76,6 +78,7 @@ public class PedidoService {
 
         clientPagos.post()
                 .uri("/pagos")
+                .header("Authorization", authorization)
                 .bodyValue(pago)
                 .retrieve()
                 .onStatus(status -> status.is4xxClientError(), response -> Mono.error(new BusinessException("El pago fue rechazado")))
@@ -92,6 +95,7 @@ public class PedidoService {
 
             clientColeccion.post()
                     .uri("/coleccion")
+                    .header("Authorization", authorization)
                     .bodyValue(coleccion)
                     .retrieve()
                     .onStatus(status -> status.is4xxClientError(), response -> Mono.error(new BusinessException("No fue posible agregar el juego a la colección")))

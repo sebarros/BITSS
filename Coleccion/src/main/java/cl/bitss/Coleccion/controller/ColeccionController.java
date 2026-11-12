@@ -29,13 +29,13 @@ public class ColeccionController {
     }
 
     @PostMapping
-    public ResponseEntity<Coleccion> crear(@Valid @RequestBody Coleccion coleccion) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(service.crear(coleccion));
+    public ResponseEntity<Coleccion> crear(@Valid @RequestBody Coleccion coleccion, @RequestHeader("Authorization") String authorization) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(service.crear(coleccion, authorization));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Coleccion> actualizar(@PathVariable Long id, @Valid @RequestBody Coleccion coleccion) {
-        return ResponseEntity.ok(service.actualizar(id, coleccion));
+    public ResponseEntity<Coleccion> actualizar(@PathVariable Long id, @Valid @RequestBody Coleccion coleccion, @RequestHeader("Authorization") String authorization) {
+        return ResponseEntity.ok(service.actualizar(id, coleccion, authorization));
     }
 
     @DeleteMapping("/{id}")

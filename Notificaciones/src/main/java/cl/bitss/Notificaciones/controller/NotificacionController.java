@@ -29,8 +29,8 @@ public class NotificacionController {
     }
 
     @PostMapping
-    public ResponseEntity<Notificacion> crear(@Valid @RequestBody Notificacion notificacion) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(service.crear(notificacion));
+    public ResponseEntity<Notificacion> crear(@Valid @RequestBody Notificacion notificacion, @RequestHeader("Authorization") String authorization) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(service.crear(notificacion, authorization));
     }
 
     @PutMapping("/{id}")
@@ -51,23 +51,23 @@ public class NotificacionController {
 
 
     @PostMapping("/ofertas")
-    public ResponseEntity<Notificacion> crearOferta(@RequestBody Map<String, Object> datos) {
+    public ResponseEntity<Notificacion> crearOferta(@RequestBody Map<String, Object> datos, @RequestHeader("Authorization") String authorization) {
         Notificacion notificacion = new Notificacion();
         notificacion.setUsuarioId(Long.valueOf(datos.get("usuarioId").toString()));
         notificacion.setTipo("OFERTA");
         notificacion.setMensaje(datos.get("mensaje").toString());
         notificacion.setEstado("PENDIENTE");
-        return ResponseEntity.status(HttpStatus.CREATED).body(service.crear(notificacion));
+        return ResponseEntity.status(HttpStatus.CREATED).body(service.crear(notificacion, authorization));
     }
 
     @PostMapping("/promociones")
-    public ResponseEntity<Notificacion> crearPromocion(@RequestBody Map<String, Object> datos) {
+    public ResponseEntity<Notificacion> crearPromocion(@RequestBody Map<String, Object> datos, @RequestHeader("Authorization") String authorization) {
         Notificacion notificacion = new Notificacion();
         notificacion.setUsuarioId(Long.valueOf(datos.get("usuarioId").toString()));
         notificacion.setTipo("PROMOCION");
         notificacion.setMensaje(datos.get("mensaje").toString());
         notificacion.setEstado("PENDIENTE");
-        return ResponseEntity.status(HttpStatus.CREATED).body(service.crear(notificacion));
+        return ResponseEntity.status(HttpStatus.CREATED).body(service.crear(notificacion, authorization));
     }
     @GetMapping("/tipo/{tipo}")
     public List<Notificacion> obtenerPorTipo(@PathVariable String tipo) {

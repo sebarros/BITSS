@@ -29,8 +29,8 @@ public class PedidoController {
     }
 
     @PostMapping
-    public ResponseEntity<Pedido> crear(@Valid @RequestBody Pedido pedido) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(service.crear(pedido));
+    public ResponseEntity<Pedido> crear(@Valid @RequestBody Pedido pedido, @RequestHeader("Authorization") String authorization) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(service.crear(pedido, authorization));
     }
 
     @PutMapping("/{id}")
