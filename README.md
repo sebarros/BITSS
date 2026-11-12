@@ -1,26 +1,44 @@
 # BITSS
 
-## Requisitos
-- Docker Desktop o Docker Engine con Docker Compose
-- Puertos 3307 y 8080-8087 disponibles
+Cada carpeta es un repositorio independiente de GitHub.
 
-## Iniciar todos los servicios
-Desde la carpeta raíz del proyecto:
+| Carpeta / repo | Descripción | Puerto | Ruta en API Gateway |
+| --- | --- | --- | --- |
+| `bitss-usuario` | Registro, login y gestión de usuarios (emite el JWT) | 8081 | `/usuarios` |
+| `bitss-catalogo` | Catálogo de videojuegos | 8082 | `/videojuegos` |
+| `bitss-carro` | Carrito de compras | 8083 | `/carrito` |
+| `bitss-gestion` | Gestión de pedidos | 8084 | `/pedidos` |
+| `bitss-pagos` | Pagos | 8085 | `/pagos` |
+| `bitss-coleccion` | Colección de videojuegos del usuario | 8086 | `/coleccion` |
+| `bitss-notificaciones` | Notificaciones | 8087 | `/notificaciones` |
+| `bitss-infra` | API Gateway (CloudFormation), setup de EC2, compose local | - | - |
 
-```bash
-docker compose up --build
+## Arquitectura
+
+```
+Cliente -> AWS API Gateway (HTTP API) -> EC2 (Docker, red bitss-net) -> usuario / catalogo / carro / gestion / pagos / coleccion / notificaciones -> MySQL
 ```
 
-La API Gateway queda disponible en `http://localhost:8080`. Los microservicios también quedan publicados individualmente en los puertos 8081 a 8087. MySQL queda publicado en el puerto 3307.
+Cada microservicio, al hacer push a `main`, ejecuta su workflow: pruebas, imagen en Docker Hub y despliegue en la EC2 vía SSM.
 
-## Detener los servicios
+## Orden de puesta en marcha
+
+1. Crear en GitHub 8 repositorios vacíos con los mismos nombres de las carpetas.
+2. Crear el repositorio público en Docker Hub para cada imagen, o dejar que se cree al primer push.
+3. Lanzar la EC2 y ejecutar `bitss-infra/ec2/setup.sh` (ver `bitss-infra/README.md`).
+4. Cargar los secrets en cada repo (tabla en el README de cada microservicio).
+5. Subir el código:
+
 ```bash
-docker compose down
+./subir-repos.sh <tu_usuario_github>
 ```
 
-Para detenerlos y borrar también los datos persistidos de MySQL:
-```bash
-docker compose down -v
-```
+6. Revisar la pestaña Actions de cada repo. Al terminar `bitss-infra` aparece la URL del API Gateway.
 
-Las URLs entre microservicios usan los nombres de servicio de Docker Compose. Las configuraciones mantienen valores predeterminados para ejecutar los servicios localmente fuera de Docker.
+## Prueba rápida
+
+```bash
+curl -X POST https://<api-id>.execute-api.<region>.amazonaws.com/usuarios/login \
+  -H "Content-Type: application/json" \
+  -d '{"correo":"a@a.cl","password":"123456"}'
+```

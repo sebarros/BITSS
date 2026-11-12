@@ -4,18 +4,17 @@
   <component name="MavenProjectsManager">
     <option name="originalFiles">
       <list>
-        <option value="$PROJECT_DIR$/Carro/pom.xml" />
-        <option value="$PROJECT_DIR$/Pagos/pom.xml" />
-        <option value="$PROJECT_DIR$/Gestion/pom.xml" />
-        <option value="$PROJECT_DIR$/Usuario/pom.xml" />
-        <option value="$PROJECT_DIR$/Catalogo/pom.xml" />
-        <option value="$PROJECT_DIR$/Coleccion/pom.xml" />
-        <option value="$PROJECT_DIR$/ApiGateway/pom.xml" />
-        <option value="$PROJECT_DIR$/Notificaciones/pom.xml" />
+        <option value="$PROJECT_DIR$/bitss-carro/pom.xml" />
+        <option value="$PROJECT_DIR$/bitss-pagos/pom.xml" />
+        <option value="$PROJECT_DIR$/bitss-gestion/pom.xml" />
+        <option value="$PROJECT_DIR$/bitss-usuario/pom.xml" />
+        <option value="$PROJECT_DIR$/bitss-catalogo/pom.xml" />
+        <option value="$PROJECT_DIR$/bitss-coleccion/pom.xml" />
+        <option value="$PROJECT_DIR$/bitss-notificaciones/pom.xml" />
       </list>
     </option>
   </component>
-  <component name="ProjectRootManager" version="2" project-jdk-name="21" project-jdk-type="JavaSDK">
+  <component name="ProjectRootManager" version="2" project-jdk-name="openjdk-26 (2)" project-jdk-type="JavaSDK">
     <output url="file://$PROJECT_DIR$/out" />
   </component>
 </project>

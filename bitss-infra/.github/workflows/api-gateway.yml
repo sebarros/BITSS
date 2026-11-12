@@ -1,0 +1,42 @@
+name: api-gateway
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "cloudformation/**"
+      - ".github/workflows/api-gateway.yml"
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Validar plantilla
+        run: aws cloudformation validate-template --template-body file://cloudformation/api-gateway.yaml
+
+      - name: Desplegar API Gateway
+        run: |
+          aws cloudformation deploy \
+            --template-file cloudformation/api-gateway.yaml \
+            --stack-name bitss-api-gateway \
+            --parameter-overrides Ec2Host=${{ secrets.EC2_PUBLIC_HOST }} \
+            --no-fail-on-empty-changeset
+
+      - name: Mostrar URL
+        run: |
+          API_URL=$(aws cloudformation describe-stacks \
+            --stack-name bitss-api-gateway \
+            --query "Stacks[0].Outputs[?OutputKey=='ApiUrl'].OutputValue" \
+            --output text)
+          echo "API Gateway: $API_URL"
+          echo "API Gateway: $API_URL" >> "$GITHUB_STEP_SUMMARY"

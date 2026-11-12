@@ -1,0 +1,267 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: API Gateway HTTP de BITSS hacia los microservicios en EC2
+
+Parameters:
+  Ec2Host:
+    Type: String
+    Description: IP elástica o DNS público de la instancia EC2
+  AllowedOrigin:
+    Type: String
+    Default: "*"
+    Description: Origen permitido por CORS
+
+Resources:
+  BitssApi:
+    Type: AWS::ApiGatewayV2::Api
+    Properties:
+      Name: bitss-api
+      ProtocolType: HTTP
+      CorsConfiguration:
+        AllowOrigins:
+          - !Ref AllowedOrigin
+        AllowMethods:
+          - GET
+          - POST
+          - PUT
+          - PATCH
+          - DELETE
+          - OPTIONS
+        AllowHeaders:
+          - authorization
+          - content-type
+
+  UsuarioBaseIntegration:
+    Type: AWS::ApiGatewayV2::Integration
+    Properties:
+      ApiId: !Ref BitssApi
+      IntegrationType: HTTP_PROXY
+      IntegrationMethod: ANY
+      PayloadFormatVersion: "1.0"
+      IntegrationUri: !Sub "http://${Ec2Host}:8081/usuarios"
+
+  UsuarioProxyIntegration:
+    Type: AWS::ApiGatewayV2::Integration
+    Properties:
+      ApiId: !Ref BitssApi
+      IntegrationType: HTTP_PROXY
+      IntegrationMethod: ANY
+      PayloadFormatVersion: "1.0"
+      IntegrationUri: !Sub "http://${Ec2Host}:8081/usuarios/{proxy}"
+
+  UsuarioBaseRoute:
+    Type: AWS::ApiGatewayV2::Route
+    Properties:
+      ApiId: !Ref BitssApi
+      RouteKey: "ANY /usuarios"
+      Target: !Sub "integrations/${UsuarioBaseIntegration}"
+
+  UsuarioProxyRoute:
+    Type: AWS::ApiGatewayV2::Route
+    Properties:
+      ApiId: !Ref BitssApi
+      RouteKey: "ANY /usuarios/{proxy+}"
+      Target: !Sub "integrations/${UsuarioProxyIntegration}"
+
+  CatalogoBaseIntegration:
+    Type: AWS::ApiGatewayV2::Integration
+    Properties:
+      ApiId: !Ref BitssApi
+      IntegrationType: HTTP_PROXY
+      IntegrationMethod: ANY
+      PayloadFormatVersion: "1.0"
+      IntegrationUri: !Sub "http://${Ec2Host}:8082/videojuegos"
+
+  CatalogoProxyIntegration:
+    Type: AWS::ApiGatewayV2::Integration
+    Properties:
+      ApiId: !Ref BitssApi
+      IntegrationType: HTTP_PROXY
+      IntegrationMethod: ANY
+      PayloadFormatVersion: "1.0"
+      IntegrationUri: !Sub "http://${Ec2Host}:8082/videojuegos/{proxy}"
+
+  CatalogoBaseRoute:
+    Type: AWS::ApiGatewayV2::Route
+    Properties:
+      ApiId: !Ref BitssApi
+      RouteKey: "ANY /videojuegos"
+      Target: !Sub "integrations/${CatalogoBaseIntegration}"
+
+  CatalogoProxyRoute:
+    Type: AWS::ApiGatewayV2::Route
+    Properties:
+      ApiId: !Ref BitssApi
+      RouteKey: "ANY /videojuegos/{proxy+}"
+      Target: !Sub "integrations/${CatalogoProxyIntegration}"
+
+  CarroBaseIntegration:
+    Type: AWS::ApiGatewayV2::Integration
+    Properties:
+      ApiId: !Ref BitssApi
+      IntegrationType: HTTP_PROXY
+      IntegrationMethod: ANY
+      PayloadFormatVersion: "1.0"
+      IntegrationUri: !Sub "http://${Ec2Host}:8083/carrito"
+
+  CarroProxyIntegration:
+    Type: AWS::ApiGatewayV2::Integration
+    Properties:
+      ApiId: !Ref BitssApi
+      IntegrationType: HTTP_PROXY
+      IntegrationMethod: ANY
+      PayloadFormatVersion: "1.0"
+      IntegrationUri: !Sub "http://${Ec2Host}:8083/carrito/{proxy}"
+
+  CarroBaseRoute:
+    Type: AWS::ApiGatewayV2::Route
+    Properties:
+      ApiId: !Ref BitssApi
+      RouteKey: "ANY /carrito"
+      Target: !Sub "integrations/${CarroBaseIntegration}"
+
+  CarroProxyRoute:
+    Type: AWS::ApiGatewayV2::Route
+    Properties:
+      ApiId: !Ref BitssApi
+      RouteKey: "ANY /carrito/{proxy+}"
+      Target: !Sub "integrations/${CarroProxyIntegration}"
+
+  GestionBaseIntegration:
+    Type: AWS::ApiGatewayV2::Integration
+    Properties:
+      ApiId: !Ref BitssApi
+      IntegrationType: HTTP_PROXY
+      IntegrationMethod: ANY
+      PayloadFormatVersion: "1.0"
+      IntegrationUri: !Sub "http://${Ec2Host}:8084/pedidos"
+
+  GestionProxyIntegration:
+    Type: AWS::ApiGatewayV2::Integration
+    Properties:
+      ApiId: !Ref BitssApi
+      IntegrationType: HTTP_PROXY
+      IntegrationMethod: ANY
+      PayloadFormatVersion: "1.0"
+      IntegrationUri: !Sub "http://${Ec2Host}:8084/pedidos/{proxy}"
+
+  GestionBaseRoute:
+    Type: AWS::ApiGatewayV2::Route
+    Properties:
+      ApiId: !Ref BitssApi
+      RouteKey: "ANY /pedidos"
+      Target: !Sub "integrations/${GestionBaseIntegration}"
+
+  GestionProxyRoute:
+    Type: AWS::ApiGatewayV2::Route
+    Properties:
+      ApiId: !Ref BitssApi
+      RouteKey: "ANY /pedidos/{proxy+}"
+      Target: !Sub "integrations/${GestionProxyIntegration}"
+
+  PagosBaseIntegration:
+    Type: AWS::ApiGatewayV2::Integration
+    Properties:
+      ApiId: !Ref BitssApi
+      IntegrationType: HTTP_PROXY
+      IntegrationMethod: ANY
+      PayloadFormatVersion: "1.0"
+      IntegrationUri: !Sub "http://${Ec2Host}:8085/pagos"
+
+  PagosProxyIntegration:
+    Type: AWS::ApiGatewayV2::Integration
+    Properties:
+      ApiId: !Ref BitssApi
+      IntegrationType: HTTP_PROXY
+      IntegrationMethod: ANY
+      PayloadFormatVersion: "1.0"
+      IntegrationUri: !Sub "http://${Ec2Host}:8085/pagos/{proxy}"
+
+  PagosBaseRoute:
+    Type: AWS::ApiGatewayV2::Route
+    Properties:
+      ApiId: !Ref BitssApi
+      RouteKey: "ANY /pagos"
+      Target: !Sub "integrations/${PagosBaseIntegration}"
+
+  PagosProxyRoute:
+    Type: AWS::ApiGatewayV2::Route
+    Properties:
+      ApiId: !Ref BitssApi
+      RouteKey: "ANY /pagos/{proxy+}"
+      Target: !Sub "integrations/${PagosProxyIntegration}"
+
+  ColeccionBaseIntegration:
+    Type: AWS::ApiGatewayV2::Integration
+    Properties:
+      ApiId: !Ref BitssApi
+      IntegrationType: HTTP_PROXY
+      IntegrationMethod: ANY
+      PayloadFormatVersion: "1.0"
+      IntegrationUri: !Sub "http://${Ec2Host}:8086/coleccion"
+
+  ColeccionProxyIntegration:
+    Type: AWS::ApiGatewayV2::Integration
+    Properties:
+      ApiId: !Ref BitssApi
+      IntegrationType: HTTP_PROXY
+      IntegrationMethod: ANY
+      PayloadFormatVersion: "1.0"
+      IntegrationUri: !Sub "http://${Ec2Host}:8086/coleccion/{proxy}"
+
+  ColeccionBaseRoute:
+    Type: AWS::ApiGatewayV2::Route
+    Properties:
+      ApiId: !Ref BitssApi
+      RouteKey: "ANY /coleccion"
+      Target: !Sub "integrations/${ColeccionBaseIntegration}"
+
+  ColeccionProxyRoute:
+    Type: AWS::ApiGatewayV2::Route
+    Properties:
+      ApiId: !Ref BitssApi
+      RouteKey: "ANY /coleccion/{proxy+}"
+      Target: !Sub "integrations/${ColeccionProxyIntegration}"
+
+  NotificacionesBaseIntegration:
+    Type: AWS::ApiGatewayV2::Integration
+    Properties:
+      ApiId: !Ref BitssApi
+      IntegrationType: HTTP_PROXY
+      IntegrationMethod: ANY
+      PayloadFormatVersion: "1.0"
+      IntegrationUri: !Sub "http://${Ec2Host}:8087/notificaciones"
+
+  NotificacionesProxyIntegration:
+    Type: AWS::ApiGatewayV2::Integration
+    Properties:
+      ApiId: !Ref BitssApi
+      IntegrationType: HTTP_PROXY
+      IntegrationMethod: ANY
+      PayloadFormatVersion: "1.0"
+      IntegrationUri: !Sub "http://${Ec2Host}:8087/notificaciones/{proxy}"
+
+  NotificacionesBaseRoute:
+    Type: AWS::ApiGatewayV2::Route
+    Properties:
+      ApiId: !Ref BitssApi
+      RouteKey: "ANY /notificaciones"
+      Target: !Sub "integrations/${NotificacionesBaseIntegration}"
+
+  NotificacionesProxyRoute:
+    Type: AWS::ApiGatewayV2::Route
+    Properties:
+      ApiId: !Ref BitssApi
+      RouteKey: "ANY /notificaciones/{proxy+}"
+      Target: !Sub "integrations/${NotificacionesProxyIntegration}"
+
+  DefaultStage:
+    Type: AWS::ApiGatewayV2::Stage
+    Properties:
+      ApiId: !Ref BitssApi
+      StageName: "$default"
+      AutoDeploy: true
+
+Outputs:
+  ApiUrl:
+    Description: URL base del API Gateway
+    Value: !GetAtt BitssApi.ApiEndpoint
